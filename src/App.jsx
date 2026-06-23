@@ -89,11 +89,16 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: '72px' }}>
       {/* Header */}
-      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ fontWeight: '800', fontSize: '14px', lineHeight: 1.2, color: 'var(--text)' }}>
-          🏗️ IOVENITTI & C. COSTRUZIONI S.r.l.
+      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '10px 16px', position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ background: '#fff', borderRadius: '8px', padding: '4px 6px', flexShrink: 0 }}>
+          <img src="/logo.jpg" alt="Logo" style={{ height: '36px', width: 'auto', display: 'block' }} />
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{viewLabel()}</div>
+        <div>
+          <div style={{ fontWeight: '800', fontSize: '13px', lineHeight: 1.2, color: 'var(--text)' }}>
+            IOVENITTI & C. COSTRUZIONI S.r.l.
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{viewLabel()}</div>
+        </div>
       </div>
 
       {/* Content */}
