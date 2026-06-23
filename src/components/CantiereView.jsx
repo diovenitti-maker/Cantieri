@@ -191,7 +191,7 @@ function BusinessPlanTab({ cantiere, transazioni, entrate, uscite, guadagno, soc
     setForm({
       entratePreviste: piano?.entratePreviste || '',
       lavori: piano?.uscitePreviste?.lavori || '',
-      terreno: piano?.uscitePreviste?.terreno || '',
+      oneri: piano?.uscitePreviste?.oneri || '',
       massimo: piano?.uscitePreviste?.massimo || '',
       damiano: piano?.uscitePreviste?.damiano || '',
       alessandro: piano?.uscitePreviste?.alessandro || '',
@@ -207,7 +207,7 @@ function BusinessPlanTab({ cantiere, transazioni, entrate, uscite, guadagno, soc
         entratePreviste: parseFloat(form.entratePreviste) || 0,
         uscitePreviste: {
           lavori: parseFloat(form.lavori) || 0,
-          terreno: parseFloat(form.terreno) || 0,
+          oneri: parseFloat(form.oneri) || 0,
           massimo: parseFloat(form.massimo) || 0,
           damiano: parseFloat(form.damiano) || 0,
           alessandro: parseFloat(form.alessandro) || 0,
