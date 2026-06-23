@@ -30,7 +30,7 @@ const STATO_CONFIG = {
   rogitato: { label: 'Rogitato', icon: '✅', colore: 'var(--blue)', bg: 'rgba(88,166,255,0.12)' },
 }
 
-export default function CantiereView({ cantiere, soci }) {
+export default function CantiereView({ cantiere, soci, onBack }) {
   const [tab, setTab] = useState('bp')
   const [transazioni, setTransazioni] = useState([])
   const [unita, setUnita] = useState([])
@@ -98,13 +98,18 @@ export default function CantiereView({ cantiere, soci }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: '800', color: cantiere.colore }}>{cantiere.nome}</h2>
-            <RendBadge val={rendimento} />
+      <div style={{ marginBottom: '16px' }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '13px', padding: '0 0 10px 0', cursor: 'pointer' }}>
+          ← Tutti i cantieri
+        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: '800', color: cantiere.colore }}>{cantiere.nome}</h2>
+              <RendBadge val={rendimento} />
+            </div>
+            <div style={{ color: 'var(--text-dim)', fontSize: '13px' }}>{cantiere.descrizione}</div>
           </div>
-          <div style={{ color: 'var(--text-dim)', fontSize: '13px' }}>{cantiere.descrizione}</div>
         </div>
       </div>
 
