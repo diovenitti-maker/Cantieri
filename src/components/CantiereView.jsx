@@ -18,7 +18,7 @@ const fmtDate = (ts) => {
 
 export const CATEGORIE_USCITE = [
   { id: 'lavori', label: 'Lavori cantiere', icon: '🔨', colore: 'var(--blue)' },
-  { id: 'terreno', label: 'Terreno & Burocrazia', icon: '📋', colore: 'var(--yellow-bright)' },
+  { id: 'oneri', label: 'Oneri vari', icon: '📋', colore: 'var(--yellow-bright)' },
   { id: 'massimo', label: 'Massimo', sublabel: 'gestione cantiere', icon: '👷', colore: 'var(--orange)' },
   { id: 'damiano', label: 'Damiano', sublabel: 'tecnico', icon: '📐', colore: 'var(--cyan)' },
   { id: 'alessandro', label: 'Alessandro', sublabel: 'agenzia', icon: '🤝', colore: 'var(--green)' },
