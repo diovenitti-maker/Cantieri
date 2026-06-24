@@ -4,6 +4,7 @@ import { collection, onSnapshot, addDoc, deleteDoc, doc, writeBatch, getDocs, qu
 import Dashboard from './components/Dashboard.jsx'
 import CantiereView from './components/CantiereView.jsx'
 import ContoCorrenteView from './components/ContoCorrenteView.jsx'
+import logoImg from './logo.jpg'
 
 
 export const SOCI = [
@@ -90,11 +91,16 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: '72px' }}>
       {/* Header */}
-      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ fontWeight: '800', fontSize: '14px', lineHeight: 1.2, color: 'var(--text)' }}>
-          🏗️ IOVENITTI & C. COSTRUZIONI S.r.l.
+      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '10px 16px', position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ background: '#ffffff', borderRadius: '8px', padding: '4px 6px', flexShrink: 0 }}>
+          <img src={logoImg} alt="Logo" style={{ height: '38px', width: 'auto', display: 'block' }} />
         </div>
-        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{viewLabel()}</div>
+        <div>
+          <div style={{ fontWeight: '800', fontSize: '13px', lineHeight: 1.2, color: 'var(--text)' }}>
+            IOVENITTI & C. COSTRUZIONI S.r.l.
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{viewLabel()}</div>
+        </div>
       </div>
 
       {/* Content */}
