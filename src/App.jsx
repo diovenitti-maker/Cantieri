@@ -4,7 +4,7 @@ import { collection, onSnapshot, addDoc, deleteDoc, doc, writeBatch, getDocs, qu
 import Dashboard from './components/Dashboard.jsx'
 import CantiereView from './components/CantiereView.jsx'
 import ContoCorrenteView from './components/ContoCorrenteView.jsx'
-import logoImg from './logo.jpg'
+import logoImg from './Logo.jpg'
 
 
 export const SOCI = [
