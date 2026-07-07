@@ -6,7 +6,109 @@ import CantiereView from './components/CantiereView.jsx'
 import ContoCorrenteView from './components/ContoCorrenteView.jsx'
 import logoImg from './Logo.jpg'
 
+/* ─── PIN LOCK ─── */
+const PIN_CORRETTO = '5102'
 
+function PinLock({ onAccess }) {
+  const [pin, setPin] = useState('')
+  const [errore, setErrore] = useState(false)
+  const [shake, setShake] = useState(false)
+
+  const premi = (cifra) => {
+    if (pin.length >= 4) return
+    const nuovo = pin + cifra
+    setPin(nuovo)
+    setErrore(false)
+    if (nuovo.length === 4) {
+      if (nuovo === PIN_CORRETTO) {
+        setTimeout(() => onAccess(), 200)
+      } else {
+        setShake(true)
+        setErrore(true)
+        setTimeout(() => { setPin(''); setShake(false) }, 800)
+      }
+    }
+  }
+
+  const cancella = () => { setPin(pin.slice(0, -1)); setErrore(false) }
+  const tasti = ['1','2','3','4','5','6','7','8','9','','0','⌫']
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: 'var(--bg)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', padding: '20px',
+    }}>
+      <div style={{ background: '#fff', borderRadius: '12px', padding: '12px 16px', marginBottom: '28px' }}>
+        <img src={logoImg} alt="Logo" style={{ height: '60px', width: 'auto', display: 'block' }} />
+      </div>
+
+      <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text)', marginBottom: '8px' }}>
+        Area riservata
+      </div>
+      <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginBottom: '36px' }}>
+        Inserisci il codice di accesso
+      </div>
+
+      {/* Pallini */}
+      <div style={{
+        display: 'flex', gap: '18px', marginBottom: '12px',
+        transform: shake ? 'translateX(0)' : 'none',
+        animation: shake ? 'shake 0.5s ease' : 'none',
+      }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{
+            width: '18px', height: '18px', borderRadius: '50%',
+            background: i < pin.length ? (errore ? 'var(--red)' : 'var(--blue)') : 'var(--border)',
+            transition: 'background 0.15s',
+            boxShadow: i < pin.length && !errore ? '0 0 8px rgba(88,166,255,0.5)' : 'none',
+          }} />
+        ))}
+      </div>
+
+      {errore && (
+        <div style={{ color: 'var(--red)', fontSize: '13px', marginBottom: '16px', fontWeight: '600' }}>
+          ❌ Codice errato
+        </div>
+      )}
+      {!errore && <div style={{ height: '29px', marginBottom: '16px' }} />}
+
+      {/* Tastierino */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', maxWidth: '270px', width: '100%' }}>
+        {tasti.map((t, i) => (
+          <button
+            key={i}
+            onClick={() => t === '⌫' ? cancella() : t !== '' ? premi(t) : null}
+            style={{
+              height: '72px', borderRadius: '50%',
+              background: t === '' ? 'transparent' : 'var(--bg-card)',
+              border: t === '' ? 'none' : '1px solid var(--border)',
+              color: t === '⌫' ? 'var(--text-dim)' : 'var(--text)',
+              fontSize: t === '⌫' ? '22px' : '26px',
+              fontWeight: '500',
+              cursor: t === '' ? 'default' : 'pointer',
+              transition: 'all 0.1s',
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-10px); }
+          40% { transform: translateX(10px); }
+          60% { transform: translateX(-6px); }
+          80% { transform: translateX(6px); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+/* ─── MAIN APP ─── */
 export const SOCI = [
   { nome: 'Chiara', pct: 50, colore: '#bc8cff' },
   { nome: 'Damiano', pct: 25, colore: '#58a6ff' },
@@ -24,7 +126,8 @@ const CANTIERI_DEFAULT = [
 ]
 
 export default function App() {
-  const [view, setView] = useState('dashboard') // 'dashboard' | 'cantieri' | 'cantiere_{id}' | 'cc'
+  const [accesso, setAccesso] = useState(false)
+  const [view, setView] = useState('dashboard')
   const [cantieri, setCantieri] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -34,7 +137,6 @@ export default function App() {
     const unsub = onSnapshot(collection(db, 'c_cantieri'), async snap => {
       if (snap.empty && !seeding) {
         setSeeding(true)
-        // Seed cantieri di default
         for (const c of CANTIERI_DEFAULT) {
           await addDoc(collection(db, 'c_cantieri'), c)
         }
@@ -56,19 +158,15 @@ export default function App() {
   const deleteCantiere = async (cantiere) => {
     if (!confirm(`Eliminare il cantiere "${cantiere.nome}" e tutti i suoi dati?\n\nQuesta azione è irreversibile.`)) return
     const batch = writeBatch(db)
-    // Delete cantiere doc
     batch.delete(doc(db, 'c_cantieri', cantiere.id))
-    // Delete business plan
     batch.delete(doc(db, 'c_business_plan', cantiere.id))
     await batch.commit()
-    // Delete transactions, units (can't batch query results, do separately)
     const txSnap = await getDocs(query(collection(db, 'c_transazioni'), where('cantiereId', '==', cantiere.id)))
     const unitaSnap = await getDocs(query(collection(db, 'c_unita'), where('cantiereId', '==', cantiere.id)))
     const batch2 = writeBatch(db)
     txSnap.docs.forEach(d => batch2.delete(d.ref))
     unitaSnap.docs.forEach(d => batch2.delete(d.ref))
     await batch2.commit()
-    // If we were viewing this cantiere, go back
     if (view === `cantiere_${cantiere.id}`) setView('cantieri')
   }
 
@@ -88,10 +186,16 @@ export default function App() {
     return ''
   }
 
+  if (!accesso) return <PinLock onAccess={() => setAccesso(true)} />
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: '72px' }}>
       {/* Header */}
-      <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '10px 16px', position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{
+        background: 'var(--bg-card)', borderBottom: '1px solid var(--border)',
+        padding: '10px 16px', position: 'sticky', top: 0, zIndex: 100,
+        display: 'flex', alignItems: 'center', gap: '12px',
+      }}>
         <div style={{ background: '#ffffff', borderRadius: '8px', padding: '4px 6px', flexShrink: 0 }}>
           <img src={logoImg} alt="Logo" style={{ height: '38px', width: 'auto', display: 'block' }} />
         </div>
@@ -108,12 +212,7 @@ export default function App() {
         {loading && <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-dim)' }}>Caricamento...</div>}
         {!loading && view === 'dashboard' && <Dashboard cantieri={cantieri} soci={SOCI} />}
         {!loading && view === 'cantieri' && (
-          <CantierList
-            cantieri={cantieri}
-            onOpen={(c) => setView(`cantiere_${c.id}`)}
-            onDelete={deleteCantiere}
-            onAdd={() => setShowAddModal(true)}
-          />
+          <CantierList cantieri={cantieri} onOpen={(c) => setView(`cantiere_${c.id}`)} onDelete={deleteCantiere} onAdd={() => setShowAddModal(true)} />
         )}
         {!loading && cantiereAttivo && (
           <CantiereView cantiere={cantiereAttivo} soci={SOCI} onBack={() => setView('cantieri')} />
@@ -122,7 +221,11 @@ export default function App() {
       </div>
 
       {/* Bottom Nav */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--bg-card)', borderTop: '1px solid var(--border)', display: 'flex', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        background: 'var(--bg-card)', borderTop: '1px solid var(--border)',
+        display: 'flex', zIndex: 100, paddingBottom: 'env(safe-area-inset-bottom)',
+      }}>
         {NAV.map(item => {
           const active = item.id === 'cantieri'
             ? (view === 'cantieri' || !!cantiereAttivo)
@@ -160,10 +263,9 @@ function CantierList({ cantieri, onOpen, onDelete, onAdd }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: '800' }}>🏗️ Cantieri</h2>
         <button onClick={onAdd} style={{ background: 'var(--blue)', border: 'none', borderRadius: '10px', padding: '10px 16px', color: '#0d1117', fontSize: '14px', fontWeight: '700' }}>
-          + Nuovo cantiere
+          + Nuovo
         </button>
       </div>
-
       {cantieri.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
           <div style={{ fontSize: '40px', marginBottom: '12px' }}>🏗️</div>
@@ -172,29 +274,17 @@ function CantierList({ cantieri, onOpen, onDelete, onAdd }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {cantieri.map(c => (
-            <div key={c.id} style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderLeft: `4px solid ${c.colore}`,
-              borderRadius: '12px',
-              padding: '18px',
-            }}>
+            <div key={c.id} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderLeft: `4px solid ${c.colore}`, borderRadius: '12px', padding: '18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <div>
                   <div style={{ fontSize: '20px', fontWeight: '800', color: c.colore }}>{c.nome}</div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-dim)' }}>{c.descrizione} · {c.numUnita} {c.tipoUnita === 'Villetta' ? 'villette' : c.tipoUnita === 'Appartamento' ? 'appartamenti' : c.tipoUnita?.toLowerCase() + 'i'}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-dim)' }}>{c.descrizione}</div>
                 </div>
-                <button
-                  onClick={() => onDelete(c)}
-                  style={{ background: 'rgba(248,81,73,0.12)', border: '1px solid rgba(248,81,73,0.3)', borderRadius: '8px', padding: '6px 10px', color: 'var(--red)', fontSize: '13px' }}
-                >
+                <button onClick={() => onDelete(c)} style={{ background: 'rgba(248,81,73,0.12)', border: '1px solid rgba(248,81,73,0.3)', borderRadius: '8px', padding: '6px 10px', color: 'var(--red)', fontSize: '13px' }}>
                   🗑️ Elimina
                 </button>
               </div>
-              <button
-                onClick={() => onOpen(c)}
-                style={{ width: '100%', background: c.colore, border: 'none', borderRadius: '10px', padding: '12px', color: '#0d1117', fontSize: '14px', fontWeight: '700' }}
-              >
+              <button onClick={() => onOpen(c)} style={{ width: '100%', background: c.colore, border: 'none', borderRadius: '10px', padding: '12px', color: '#0d1117', fontSize: '14px', fontWeight: '700' }}>
                 Apri cantiere →
               </button>
             </div>
@@ -208,9 +298,7 @@ function CantierList({ cantieri, onOpen, onDelete, onAdd }) {
 /* ─── MODAL NUOVO CANTIERE ─── */
 function AddCantiereModal({ onClose, onSave, coloriDisponibili, coloriUsati }) {
   const [form, setForm] = useState({
-    nome: '',
-    tipoUnita: 'Appartamento',
-    numUnita: '',
+    nome: '', tipoUnita: 'Appartamento', numUnita: '',
     colore: coloriDisponibili.find(c => !coloriUsati.includes(c)) || coloriDisponibili[0],
   })
   const [saving, setSaving] = useState(false)
@@ -224,13 +312,7 @@ function AddCantiereModal({ onClose, onSave, coloriDisponibili, coloriUsati }) {
     if (!form.nome.trim() || !form.numUnita) return
     setSaving(true)
     try {
-      await onSave({
-        nome: form.nome.trim().toUpperCase(),
-        descrizione,
-        numUnita: parseInt(form.numUnita),
-        tipoUnita: form.tipoUnita,
-        colore: form.colore,
-      })
+      await onSave({ nome: form.nome.trim().toUpperCase(), descrizione, numUnita: parseInt(form.numUnita), tipoUnita: form.tipoUnita, colore: form.colore })
       onClose()
     } finally { setSaving(false) }
   }
@@ -255,13 +337,10 @@ function AddCantiereModal({ onClose, onSave, coloriDisponibili, coloriUsati }) {
         <Label>Numero unità *</Label>
         <input type="number" value={form.numUnita} onChange={e => set('numUnita', e.target.value)} style={INPUT} placeholder="Es. 8" min="1" />
 
-        <Label>Colore identificativo</Label>
+        <Label>Colore</Label>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
           {coloriDisponibili.map(col => (
-            <button key={col} onClick={() => set('colore', col)} style={{
-              width: '36px', height: '36px', borderRadius: '50%', background: col, border: form.colore === col ? '3px solid #fff' : '3px solid transparent',
-              outline: form.colore === col ? `2px solid ${col}` : 'none', cursor: 'pointer',
-            }} />
+            <button key={col} onClick={() => set('colore', col)} style={{ width: '36px', height: '36px', borderRadius: '50%', background: col, border: form.colore === col ? '3px solid #fff' : '3px solid transparent', outline: form.colore === col ? `2px solid ${col}` : 'none', cursor: 'pointer' }} />
           ))}
         </div>
 
