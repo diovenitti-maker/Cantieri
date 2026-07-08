@@ -130,14 +130,21 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: '72px' }}>
+      {/* Header con pulsante Esci */}
       <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', padding: '10px 16px', position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div style={{ background: '#ffffff', borderRadius: '8px', padding: '4px 6px', flexShrink: 0 }}>
           <img src={logoImg} alt="Logo" style={{ height: '38px', width: 'auto', display: 'block' }} />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontWeight: '800', fontSize: '13px', lineHeight: 1.2, color: 'var(--text)' }}>IOVENITTI & C. COSTRUZIONI S.r.l.</div>
           <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{viewLabel()}</div>
         </div>
+        <button
+          onClick={() => { if (confirm('Vuoi uscire dall\'app?')) setAccesso(false) }}
+          style={{ background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: '8px', padding: '7px 12px', color: 'var(--text-dim)', fontSize: '12px', fontWeight: '600', flexShrink: 0 }}
+        >
+          🔒 Esci
+        </button>
       </div>
 
       <div style={{ maxWidth: '700px', margin: '0 auto', padding: '18px 14px' }}>
